@@ -1,9 +1,9 @@
 # vue-study
-[vue 설치방법](#vue-설치방법)
-[vue 속성](#vue-속성)
-[Basic of Syntax](#basic-of-syntax)
+- [vue 설치방법](#vue-설치방법)
+- [vue 속성](#vue-속성)
+- [Basic of Syntax](#basic-of-syntax)
 
-- vue 공식 문서(https://v2.vuejs.org/)
+vue 공식 문서(https://v2.vuejs.org/)
 
 ## vue 설치방법
 - vscode Vetur exension 설치
