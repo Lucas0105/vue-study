@@ -6,6 +6,8 @@
 # vue CLI
 - [설치 방법](#설치-방법)
 - [컴포넌트 사용하는 방법](#컴포넌트-사용하는-방법)
+- [값을 전달하는 방법 (pass props) 부모 -> 자식](#값을-전달하는-방법)
+- [자식이 부모에게 값의 변경을 요청 하는 방법(Emit)](#부모값의-변경-요청)
 
 vue 공식 문서(https://v2.vuejs.org/)
 
@@ -329,3 +331,84 @@ export default {
   </div>
 </template>
 ```
+
+## 값을 전달하는 방법
+
+### Static 정적으로 데이터 보내기
+- HTML이기 때문에 소문자로 인식하여 캐밥케이스로 작성
+- ParentComponent
+```
+<ChildComponent msg-test="캐밥 케이스로 전달해주세요." />
+```
+
+- ChildComponent
+```
+<template>
+{{ msgTest }}
+</template>
+
+export default {
+  name:"ChildComponent",
+  props: {
+    msgTest: String
+  }
+
+}
+<script>
+
+
+</script>
+```
+
+### 동적으로 보내기
+- ParentComponent
+```
+<ChildComponent :msg-test="변수" />
+```
+- 부모 컴포넌트의 값이 변하면 자식 컴포넌트 값도 변함
+
+
+## 부모값의 변경 요청
+- 상위 컴포넌트는 이벤트를 통해 데이터를 받음
+
+### Child Component
+```
+<template>
+<button @click="ChildToParent"> 클릭! </button>
+</template>
+
+<script>
+  export default {
+    methods: {
+      ChildToParent : function() {    
+        # this.$emit('child-to-parent', 'child data')           # static data
+        this.$emit('child-to-parent', this.childInputData)      # dynamic data
+
+      }
+      
+    }
+  }
+</script>
+```
+
+### Parent Component
+```
+<template>
+  <ChildComponent @child-to-parent="parentGetEvent" />
+</template>
+
+<script>
+  export default {
+    methods: {
+      parentGetEvent: function(inputDate) {
+        console.log('자식 컴포넌트에서 발생한 이벤트!")
+        console.log(`child component로 부터 ${inputDate} 받음`)
+      }
+    }
+  }
+</script>
+  
+```
+
+- 주의: 자식의 자식이나 부모의 부모로 점프할 수 없다.
+- 중간 컴포넌트를 거쳐 사용해야 한다.
