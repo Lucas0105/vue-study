@@ -1,7 +1,10 @@
-# vue-study
+# vue 기초
 - [vue 설치방법](#vue-설치방법)
 - [vue 속성](#vue-속성)
 - [Basic of Syntax](#basic-of-syntax)
+
+# vue CLI
+- [설치 방법](#설치-방법)
 
 vue 공식 문서(https://v2.vuejs.org/)
 
@@ -250,4 +253,78 @@ const app = new Vue({
       this.bye_msg = event.target.value
     }
     </script>
+```
+
+## 설치 방법
+### 설치
+```
+npm install -g @vue/cli
+```
+
+### 프로젝트 생성
+- vscode terminal에서 진행
+```
+vue create 프로젝트 이름
+```
+
+## 컴포넌트 사용하는 방법
+
+#### 1. 컴포넌트 파일 만들기
+- components 폴더 안에 만들기
+
+#### 2. script에 이름 등록
+```
+<script>
+export default {
+  name:"MyComponent"
+}
+</script>
+```
+
+#### 3. template에 요소 추가
+- templates안에는 반드시 하나의 요소만 추가 해야 함
+```
+<template>
+  <div>
+    <h1>이거는 내가 만든 새로운 컴포넌트다!!!!!!!!!!!!!!!!!</h1>
+  </div>
+</template>
+```
+
+
+### component 등록
+#### 1. 불러오기
+- app.vue에서 import
+```
+<script>
+  import MyComponent from './components/MyComponent.vue'
+  import MyComponent from '@/components/MyComponent'
+</script>
+```
+- scr 절대 경로가 @로 설정되어 있음, .vue도 생략가능
+
+#### 2. 등록하기
+- app.vue에서 등록
+```
+<script>
+export default {
+  name: 'App',
+  components: {
+    HelloWorld,
+    MyComponent,
+  }
+}
+</script>
+```
+
+#### 3. 보여주기
+- app.vue template에 보여주기
+```
+<template>
+  <div id="app">
+    <img alt="Vue logo" src="./assets/logo.png">
+    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <MyComponent/>
+  </div>
+</template>
 ```
