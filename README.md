@@ -9,6 +9,8 @@
 - [값을 전달하는 방법 (pass props) 부모 -> 자식](#값을-전달하는-방법)
 - [자식이 부모에게 값의 변경을 요청 하는 방법(Emit)](#부모값의-변경-요청)
 
+# 기타
+- [환경 설정 파일(env) 방법)[#환경-설정-파일]
 vue 공식 문서(https://v2.vuejs.org/)
 
 ## vue 설치방법
@@ -412,3 +414,18 @@ export default {
 
 - 주의: 자식의 자식이나 부모의 부모로 점프할 수 없다.
 - 중간 컴포넌트를 거쳐 사용해야 한다.
+
+
+## 환경 설정 파일
+- .env 파일을 프로젝트 폴더 위치에 저장
+- .env.local, .env, .env.test => .env에 다른 이름을 붙여도 process.env로 접근
+
+- env 파일
+```
+VUE_APP_API_KEY = abcdefghijklmnopqrstuvwxyz
+```
+
+- 접근 방법
+```
+process.env.VUE_APP_API_KEY
+```
