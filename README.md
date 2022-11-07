@@ -9,6 +9,12 @@
 - [값을 전달하는 방법 (pass props) 부모 -> 자식](#값을-전달하는-방법)
 - [자식이 부모에게 값의 변경을 요청 하는 방법(Emit)](#부모값의-변경-요청)
 
+# vuex
+- [vuex 시작하기](#vuex-시작하기)
+- [Lifecycle Hooks](#lifecycle-hooks)
+- [Local Storage](#local-storage)
+
+
 # 기타
 - [환경 설정 파일(env) 방법](#환경-설정-파일)
 
@@ -416,6 +422,151 @@ export default {
 
 - 주의: 자식의 자식이나 부모의 부모로 점프할 수 없다.
 - 중간 컴포넌트를 거쳐 사용해야 한다.
+
+
+## vuex 시작하기
+### vuex plugin 적용하기
+```
+vue create vuex-app
+
+cd vuex-app
+
+vue add vuex
+```
+
+### 핵심 컨셉 4가지
+#### state
+- 중앙에서 관리하는 모든 상태 정보
+- $store.state로 state 데이터에 접근 가능
+- computed에 정의 후 접근하는 것을 권장
+```
+computed: {
+  message() {
+    return this.$store.state.message
+  }
+}
+```
+
+#### mutations
+- state를 변경하는 유일한 방법
+- state의 변화 시기를 특정하기 위해 동기적이어야 함
+- commit('호출하고자 하는 mutations 함수', payload)에 의해 호출 됨
+- 대문자 상수 형태로 
+```
+actions: {
+  changeMessage(context, message) {
+    commit('CHANGE_MESSAGE', message)
+  }
+}
+```
+
+```
+mutations: {
+  CHANGE_MESSAGE(state, message) {
+    state.message = message
+  }
+}
+```
+
+#### Actions
+- state를 직접 변경하지 않고 mutations를 호출해서 state를 변경함
+- 비동기 작업이 포함될 수 있는 methods (외부 API와의 소통)
+- state 변경을 제외한 로직
+- 모든 데이터, methods에 접근 가능
+- dispatch('actions 함수', payload)에 의해 호출 됨
+
+```
+methods: {
+  changeMessage() {
+    this.$store.dispatch('changeMessage', message)
+  }
+}
+```
+
+- store, context는 store의 전반적인 속성을 모두 가지고 있음(context.state, context.getters...)
+```
+actions: {
+  changeMessage(context, message) {
+    commit('CHANGE_MESSAGE', message)
+  }
+}
+```
+
+#### Getters
+- computed와 같은 역할
+- state를 활용하여 계산된 값을 얻고자 할 때 사용
+- 종속된 값이 변경된 경우에만 재계산됨
+- 첫 번째 인자는 state, 두 번째 인자는 getters
+```
+getters: {
+  messageLength(state) {
+    return state.message.length
+  },
+  
+  doubleLength(state, getters) {
+    return getters.messageLength * 2
+  },
+}
+```
+- getters 출력하기
+```
+computed: {
+  messageLength() {
+    return this.$store.getters.messageLength
+  }
+}
+```
+
+#### 흐름
+- 조작
+component => (actions) => mutations => state
+
+- 사용
+state => (getters) => component
+
+## Lifecycle Hooks
+### created
+- vue instanc가 생성된 후 호출됨
+- data, computed가 완료된 상태
+- mount 되지 않아 요소에 접근할 수 없음
+
+### mounted
+- vue instance가 요소에 mount 된 후 호출됨
+- mount 된 요소를 조작할 수 있음
+
+
+### updated
+- 데이터가 변경되어 DOM에 변화를 줄 때 호출 됨
+- 데이터만 변경된 경우는 호출하지 않음
+
+
+## Local Storage
+### obj To JSON
+```
+JSON.stringify(obj)
+```
+
+### JSON To obj
+```
+JSON.parse(json file)
+```
+
+### localstorate 자동 관리해주는 라이브러리
+- vuex-persistedstate
+```
+npm i vuex-persistedstate
+```
+
+- index.js
+```
+import createPersistedState from 'vuex-persistedstate'
+
+export default({
+  plugins: [
+    createPersistedState(),
+  ]
+})
+```
 
 
 ## 환경 설정 파일
