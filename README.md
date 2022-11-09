@@ -14,9 +14,14 @@
 - [Lifecycle Hooks](#lifecycle-hooks)
 - [Local Storage](#local-storage)
 
+# vue-router
+- [vue Router 시작하기](#vue-router-시작하기)
+- [Dynamic Router](#dynamic-router)
+- [네비게이션 가드](#네비게이션-가드)
 
 # 기타
 - [환경 설정 파일(env) 방법](#환경-설정-파일)
+- [값이 없을 때 처리 방법](#값이-없을-때-처리-방법)
 
 
 vue 공식 문서(https://v2.vuejs.org/)
@@ -568,6 +573,198 @@ export default({
 })
 ```
 
+## vue Router 시작하기
+### vue cli에서 vue router 설치 및 반영하기
+```
+vue add router
+```
+
+### history 모드
+- URL 이동 기록을 남길 수 있음
+```
+http://localhost:8080/index
+```
+
+- 사용하지 않으면 hash mode로 설정됨
+```
+http://localhost:8080#index
+```
+### 등록하기
+- router/index.js
+```
+import HomeView from '../views/HomeView.vue'
+
+const routes = [
+  {
+    path: '/',
+    name: 'home',
+    component: HomeView
+    // lazy-loading : 미리 로드하지 않고 특정 라우트에 방문할 떄 로드 => 최초 로드하는 시간이 빨라짐, 새로고침할 때 깜빡이는 것을 알 수 있음
+    // component: () => import(/* webpackChunkName: "about" */ '../views/HomeView.vue')
+
+  },
+```
+
+### 사용하기
+```
+<nav>
+  <router-link to="/">Home</router-link>
+  <router-link to="/about">About</router-link>
+</nav>
+<router-view/>
+```
+
+- a 태그와 달리 브라우저가 페이지를 다시 로드하지 않음, 컴포넌트만 변경
+
+- App.vue는 base.html의 역할
+- router-view는 block 태그로 감싼 부분
+
+- views: router와 직접적으로 연결된 component들
+
+#### 주소를 이동하는 2가지 방식
+- 선언적 방식 네비게이션
+```
+  <router-link to="/">Home</router-link>
+  <router-link :to="{ name: 'home' }">Home</router-link>
+  
+// base.html에 해당하는 부분
+<router-view/>
+```
+- 프로그래밍 방식 네비게이션
+- javascript 함수 안에서
+```
+this.$router.push({ name: 'home' })
+```
+
+## Dynamic Router
+### 등록하기
+- router/index.js
+```
+import HelloView from '@/views/HelloView.vue'
+
+  const routes= [
+    {
+      path: '/hello/:userName',
+      name: 'hello',
+      component: HelloView
+    }
+  ]
+```
+
+### 사용하기
+- views/HelloView.vue
+```
+<h1>
+  {{ $route.params.userName }}
+  {{ userName }}
+
+</h1>
+
+// 아래 방식을 권장
+<script>
+  export default {
+    name: 'HellowView',
+    data(){
+      return {
+        userName: this.$route.params.userName
+      }
+    }
+  }
+</script>
+```
+
+### Dynamic Route 선언적 방식 네비게이션
+```
+    <router-link :to="{ name: 'hello', params: { userName: 'harry' } }"
+```
+
+### Dynamic Route 프로그래밍 방식 네비게이션
+- javascript
+```
+  goToHello() {
+    this.$router.push({ name: 'hello', params: {userName: this.inputData} })
+  }
+```
+
+
+## 네비게이션 가드
+### 전역 가드
+- 다른 url주소로 이동할 때 항상 실행
+- router/index.js에서 작성
+```
+router.beforeEach((to, from, next) => {
+  const isLogin = true
+  
+  const authPages = ['hello']
+  
+  const isAuthRequired = authPages.includes(to.name)
+  
+  if (isAuthRequired && !isLogin) {
+    next({ name: 'login' })
+  } else {
+    next({ name: to.name })
+  }
+  // name()
+})
+# to : 이동할 url 정보가 담긴 Route 객체
+# form : 현재 URL 정보가 담긴 Route 객체
+# next : 지정한 URL로 이동하기 위해 호출하는 함수, 기본적으로 to에 해당하는 URL로 이동
+```
+
+### 라우터 가드
+- route에 진입했을 때 실행됨
+- routes에 작성
+```
+{
+    path: '/login',
+    name: 'login',
+    component: () => import('@/views/LoginView.vue'),
+    beforeEnter(to, from, next) {
+      
+    }
+}
+```
+
+### 컴포넌트 가드
+- 해당 컴포넌트를 렌더링하는 경로가 변경될 때 실행
+- OOOView.vue에 작성
+```
+  export default {
+    ...
+    data() {
+      return{
+        userName : this.$route.params.userName
+      }
+    }
+    beforeRouteUpdate(to, from, next) {
+      this.userName = to.params.username
+      next()
+    }
+  }
+```
+
+### NotFound 처리
+- router/index.js
+- 가장 아래에 path: '*'이 있어야 함
+```
+{
+    path: '/404',
+    name: 'NotFound404',
+    component: NotFound404
+  },
+  {
+    path: '*',
+    redirect: '/404',
+  }
+```
+- 해당 라우터가 존재하지 않는 경우
+- article/30 => NotFound 처리 해줘야 함
+```
+.catch((error) => {
+  // this.$router.push({name:'NotFound404'})
+  this.$router.push('/404')
+  })
+```
 
 ## 환경 설정 파일
 - .env 파일을 프로젝트 폴더 위치에 저장
@@ -581,4 +778,19 @@ VUE_APP_API_KEY = abcdefghijklmnopqrstuvwxyz
 - 접근 방법
 ```
 process.env.VUE_APP_API_KEY
+```
+
+## 값이 없을 때 처리 방법
+- 사용하고자 하는 값이 null 일 때 해당 값 뒤에 ?를 붙여서 사용하면 값이 없어도 에러를 발생시키지 않는다.
+- 없으면 undefinde를 발생시킴
+```
+{{ article?.id }}
+{{ article?.title }}
+
+<script>
+  const createdAt = new Date(article?.createdAt).toLocaleString()
+</script>
+// article.createdAt 값은 1661231258754 초로 되어 있음 => new Date().getTime()
+// .toLocaleString()을 하면 2022. 11. 9. 오후 4:20:01 식으로 출력 됨
+
 ```
