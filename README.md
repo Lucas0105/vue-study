@@ -19,6 +19,14 @@
 - [Dynamic Router](#dynamic-router)
 - [네비게이션 가드](#네비게이션-가드)
 
+
+# vue with DRF
+- [CORS 이슈](#cors-이슈)
+- [Dj-Rest-Auth](#dj-rest-auth)
+- [Vue Token 관리](#vue-token-관리)
+- [drf-spectacular](#drf-spectacular)
+
+
 # 기타
 - [환경 설정 파일(env) 방법](#환경-설정-파일)
 - [값이 없을 때 처리 방법](#값이-없을-때-처리-방법)
@@ -765,6 +773,177 @@ router.beforeEach((to, from, next) => {
   this.$router.push('/404')
   })
 ```
+
+## CORS 이슈
+### 발생하는 이유
+- SOP(Same - Origin Policy) 동일 출처 정책 : 브라우저에서 다른 출처의 리소스와 상호작용하는 것을 제한하기 때문에 발생, 보안상의 이유 (vue - browser - django)
+- 출처 : protocol, Host, port까지가 출처를 의미함 (http://localhost:3000/)
+
+### 해결 방법
+- 서버에서 HTTP Header를 사용하여 다른 출처의 자원에 접근할 수 있는 권한을 부여하도록 브라우저에 알려줌
+
+### CORS 설정
+- Access-Control-Allow-Origin : 단일 출처를 지정하여 브라우저가 해당 출처에 접근할 수 있도록 설정
+- django-cors-headers 문서 : https://github.com/adamchainz/django-cors-headers
+#### 설치
+- settings.py에서 진행
+```
+python -m pip install django-cors-headers
+```
+
+#### APP 등록
+```
+INSTALLED_APPS = [
+    ...,
+    "corsheaders",
+    ...,
+]
+```
+
+#### Middle Ware 등록
+```
+MIDDLEWARE = [
+    ...,
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    ...,
+]
+```
+
+#### Access-Control-Allow-Origin 등록
+```
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8080",
+]
+```
+
+
+## Dj-Rest-Auth
+- 문서 : https://github.com/iMerica/dj-rest-auth
+### install
+```
+  pip install dj-rest-auth
+```
+
+### settings.py
+
+```
+INSTALLED_APPS = (
+    ...,
+    'rest_framework',
+    'rest_framework.authtoken',
+    ...,
+    'dj_rest_auth'
+)
+```
+
+### pjt/urls.py
+```
+path('accounts/', include('dj_rest_auth.urls')),
+```
+
+
+### 회원가입, 로그인할 때 토큰 생성
+- 문서 : https://dj-rest-auth.readthedocs.io/en/latest/installation.html#registration-optional
+- 제공하는 url을 "주소/accounts/"에서 확인할 수 있음
+#### 설치
+```
+pip install 'dj-rest-auth[with_social]'
+```
+
+#### settings.py
+```
+INSTALLED_APPS = (
+    ...,
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'dj_rest_auth.registration',
+)
+
+SITE_ID = 1
+```
+
+#### pjt/urls.py
+```
+    path('dj-rest-auth/registration/', include('dj_rest_auth.registration.urls'))
+```
+
+#### 토큰 기반으로 인증할 것을 설정 settings.py
+```
+REST_FRAMEWORK = {
+    # Authentication
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    
+    # permission
+    'DEFAULT_PERMISSION_CLASSES': [
+        # 모든 요청에 권한 확인
+        # 'rest_framework.permissions.IsAuthenticated',
+        
+        # 모든 요청에 허용한 후 인증이 필요한 부분만 데코레이터로 인증이 필요한것으로 설정
+        'rest_framework.permissions.AllowAny',
+    ],
+}
+```
+
+#### 데코레이터로 설정
+```
+
+# permission Decorators
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import IsAuthenticated
+
+
+@permission_classes([IsAuthenticated])
+```
+
+## Vue Token 관리
+
+### localstorage로 관리
+- vuex-persistedstate
+```
+npm install vuex-persistedstate
+```
+
+### store/index.js
+```
+import createPersistedState from "vuex-persistedstate";
+
+const store = new Vuex.Store({
+  // ...
+  plugins: [createPersistedState()],
+});
+```
+
+### vuex 상태로 관리
+```
+this.token = res.data.key
+```
+
+### 로그인 유무 확인
+```
+getters: {
+  isLogin(state) {
+    return state.token ? true : false
+  }
+},
+```
+
+### token axios에 추가
+```
+
+headers: {
+  Authorization: `Token 12314124`
+}
+```
+
+## drf-spectacular
+- 문서 : https://drf-spectacular.readthedocs.io/en/latest/index.html
+- swagger 기능을 제공
+
 
 ## 환경 설정 파일
 - .env 파일을 프로젝트 폴더 위치에 저장
